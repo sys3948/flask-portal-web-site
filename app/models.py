@@ -1,0 +1,1 @@
+# application DataBase model의 스크립트 파일

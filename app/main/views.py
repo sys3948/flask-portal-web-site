@@ -1,0 +1,1 @@
+# main page의 route & view function들이 있는 스크립트 파일

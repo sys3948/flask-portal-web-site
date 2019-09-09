@@ -1,0 +1,1 @@
+# blog site의 blueprint 등록하는 스크립트 파일

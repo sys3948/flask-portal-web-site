@@ -1,0 +1,1 @@
+# main site(portal)의 blueprint를 등록하는 스크립트 파일

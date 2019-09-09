@@ -1,0 +1,1 @@
+# webhard page의 route와 view funcrion들이 있는 스크립트 파일

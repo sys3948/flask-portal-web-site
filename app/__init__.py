@@ -1,0 +1,1 @@
+# application에 필요한 Flask와 확장(extend) 패키지들을 instance하는 스크립트 파일
