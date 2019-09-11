@@ -1,0 +1,143 @@
+{% extends "main/base.html" %}
+
+{% block contents %}
+<header class="container border-bottom">
+  <h2 class="text-center mt-2 mb-2 subtitle">회원가입</h2>
+</header>
+<section class="container">
+  <form class="container mt-4 col-sm-7" id="form">
+    <div class="container input-group input-group-lg">
+      <div class="input-group-prepend">
+        <span class="input-group-text fas fa-user-alt input-icon"></span>
+      </div>
+      <input type="text" class="form-control" id="id" placeholder="아이디">
+      <span class="container idMsg"></span>
+    </div>
+    <div class="container input-group input-group-lg mt-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text fas fa-user-alt input-icon"></span>
+      </div>
+      <input type="text" class="form-control" id="userName" placeholder="닉네임">
+      <span class="container userNameMsg"></span>
+    </div>
+    <div class="container input-group input-group-lg mt-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text fas fa-unlock-alt input-icon"></span>
+      </div>
+      <input type="password" class="form-control" id="pw" placeholder="비밀번호">
+    </div>
+    <div class="container input-group input-group-lg mt-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text fas fa-unlock-alt input-icon"></span>
+      </div>
+      <input type="password" class="form-control" id="confirmPw" placeholder="비밀번호 확인">
+      <span class="container pwMsg"></span>
+    </div>
+    <div class="container">
+      <span class="container" id="msg"></span>
+    </div>
+    <div class="container mt-4 text-center">
+      <input type="submit" class="container btn btn-primary col-md-5" id="submit" value="회원가입"/>
+    </div>
+  </form>
+</section>
+<script>
+  var checkId = false;
+  var checkUserName = false;
+  var checkPw = false;
+  var idValue;
+  var userNameValue;
+  var pwValue;
+  var confirmPwValue;
+ 
+  $('#id').on('blur', function(){
+    idValue = $('#id').val();
+    $.ajax({
+      url: "{{url_for('main.register')}}",
+      type:"post",
+      contentType: "application/json;charset=utf-8",
+      data: JSON.stringify({"id":idValue}),
+      dataType: "json",
+      success: function(response){
+        if(response.data == true){
+          $('.idMsg').css("color","rgb(26, 26, 255)");
+          $('.idMsg').text('사용 가능한 아이디 입니다.');
+          checkId = true;
+        }else{
+          $('.idMsg').css("color","rgb(255, 71, 26)");
+          $('.idMsg').text('존재하는 아이디라 사용 불가합니다.');
+          checkId = false;
+        }
+      }
+    });
+  });
+ 
+  $('#userName').on('blur', function(){
+    userNameValue = $('#userName').val();
+    $.ajax({
+     url: "{{url_for('main.register')}}",
+     type: "post",
+     contentType: "application/json;charset=utf-8",
+     data: JSON.stringify({"userName":userNameValue}),
+     dataType: "json",
+     success: function(response){
+      if(response.data == true){
+        $(".userNameMsg").css("color", "rgb(26, 26, 225)");
+        $(".userNameMsg").text("사용가능한 닉네임입니다.");
+        checkUserName = true;
+      }else{
+        $(".userNameMsg").css("color", "rgb(225, 71, 26)");
+        $(".userNameMsg").text("존재하는 닉네임이라 사용이 불가능합니다.");
+        checkUserName = false;
+      }
+     }
+    });
+  });
+ 
+ $("#pw").on("blur", function(){
+   pwValue = $("#pw").val().replace(/ /gi, "");
+   console.log(pwValue);
+   if(pwValue == ""){
+     console.log(pwValue);
+     $(".pwMsg").css("color", "rgb(225, 71, 26)");
+     $(".pwMsg").text("비밀번호 값이 없습니다. 비밀번호를 입력해주세요.");
+   }
+ });
+ 
+ $("#confirmPw").on("blur", function(){
+   confirmPwValue = $("#confirmPw").val().replace(/ /gi, "");
+   if(pwValue == confirmPwValue && pwValue != "" && confirmPwValue != ""){
+     $(".pwMsg").css("color", "rgb(26, 26, 225)");
+     $(".pwMsg").text("비밀번호와 비밀번호 확인이 맞습니다.");
+     checkPw = true;
+   }else{
+     $(".pwMsg").css("color", "rgb(225, 71, 26)");
+     $(".pwMsg").text("비밀번호와 비밀번호 확인이 맞지 않습니다.");
+     checkPw = false;
+   }
+ });
+ 
+ $("#submit").on("click", function(event){
+   event.preventDefault();
+   if(checkId, checkUserName, checkPw){
+     $.ajax({
+       url: "{{url_for('main.register')}}",
+       type: "post",
+       contentType: "application/json;charset=utf-8",
+       data: JSON.stringify({"form":{"id":idValue, "username":userNameValue, "password":pwValue}}),
+       success: function(response){
+         if(response.data == true){
+            location.replace("{{ url_for('main.login') }}");
+          }else{
+            $("#msg").css("color", "rgb(225, 71, 26)");
+            $("#msg").text("회원가입을 실패합니다. 실패 이유는 다음과 같습니다." + response.msg);
+          }
+       }
+     });
+   }else{
+     $("#msg").css("color", "rgb(225, 71, 26)");
+     $("#msg").text("회원가입을 실패합니다.");
+   }
+ });
+</script>
+{% endblock %}
