@@ -1,0 +1,48 @@
+{% extends "main/profile_base.html" %}
+
+{% block title %}Flask - Portal Site Edit Profile{% endblock %}
+
+{% block contents %}
+  <div class="m-5">
+    <div class="container col-sm-6">
+      <form>
+        <div class="row">
+          <div class="bg-secondary col-sm-4 text-center">
+            <h4 class="text-light font-weight-bold m-4">프로필 사진</h4>
+          </div>
+          <div class="border bg-light col-sm-8">
+            <div class="container">
+              <div class="mt-3">
+                {% if user.profile_name == 'default-profile.png' %}
+                  <img src="{{url_for('static', filename='profile/')}}default-profile.png" class="rounded-circle" />
+                {% else %}
+                  <img src="{{url_for('static', filename='profile/')}}{{user.user_id}}/{{user.profile_name}}" class="rounded-circle" />
+                {% endif %}
+              </div>
+              <div class="mt-2 container">
+                <label class="btn btn-secondary float-left" for="profile">변경</label>
+                <input type="file" id="profile" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;"/>
+                   
+                <a href="#" class="btn btn-secondary float-right text-light">삭제</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="bg-secondary col-sm-4 text-center">
+            <h4 class="text-light font-weight-bold m-4">닉네임</h4>
+          </div>
+          <div class="border bg-light col-sm-8">
+            <div class="container">
+              <input class="form-control m-3" type="text" value="{{user.username}}"/>
+            </div>
+          </div>
+        </div>
+        <div class="container mt-3">
+          <input type="submit" class="btn btn-outline-secondary float-left" disabled>
+          <a href="#" class="btn btn-outline-secondary float-right">취소</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

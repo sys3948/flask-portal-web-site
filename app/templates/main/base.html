@@ -37,8 +37,22 @@
     </style>
     {% block stylesheet %}
     {% endblock %}
+    <title>
+      {% block title %}
+      {% endblock %}
+    </title>
   </head>
   <body class="">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-warning container">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <li>{{message}}</li>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
     <header class="border-bottom header">
       <div class="mt-5">
         <div class="container">

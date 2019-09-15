@@ -3,6 +3,7 @@
 class Config:
     # 공통 설정 class
     SECRET_KEY = 'secret key in flask'
+    PROFILE_PATH = 'app/static/profile'
 
 
 class DevelopConfig(Config):

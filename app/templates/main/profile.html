@@ -1,0 +1,39 @@
+{% extends "main/profile_base.html" %}
+
+{% block title %}Flask - PortalSite Profile{% endblock %}
+
+{% block contents %}
+  <div class="d-flex justify-content-between m-5">
+    <div class=" col-sm-5 bg-light border rounded">
+      <header class="m-1">
+        <h4 class="font-weight-bold">프로필</h4>
+      </header>
+      <section class="row m-1">
+        <div class="col-sm-3">
+          {% if user.profile_name =='default-profile.png' %}
+            <img src="{{url_for('static', filename='profile/')}}default-profile.png" />
+          {% else %}
+            <img src="{{url_for('static', filename='profile/')}}{{user.user_id}}/{{user.profile_name}}" />
+          {% endif %}
+        </div>
+        <div class="col-sm-9">
+          <p class="container">닉네임: {{user.username}}</p>
+        </div>
+      </section>
+      <a href="{{url_for('main.edit_profile')}}" class="container btn btn-outline-secondary col-sm-2 m-2">수정</a>
+    </div>
+    <div class="col-sm-5 bg-light border">
+      <header>
+        <h4 class="font-weight-bold m-1">비밀번호 변경</h4>
+      </header>
+      <section class="row m-1">
+        <div class="col-sm-6">
+          <p class="font-weight-bold">비밀번호</p>
+        </div>
+        <div class="col-sm-6">
+          <a href="#" class="font-weight-bold">변경하기</a>
+        </div>
+      </section>
+    </div>
+  </div>
+{% endblock %}
