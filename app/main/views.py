@@ -9,6 +9,7 @@ import os
 
 @main.route('/')
 def index():
+    # 메인 페이지 뷰함수
     user = None
     if 'id' in session:
         user = User.query.filter_by(id = session['id']).first_or_404()
@@ -19,7 +20,6 @@ def index():
 @main.route('/login', methods=['GET', 'POST'])
 def login():
     # 로그인 뷰함수
-    print(session)
     if request.method == 'POST':
         id = request.form['id']
         pw = request.form['pw']
@@ -41,9 +41,11 @@ def login():
 def register():
     # 회원가입 뷰함수
     if request.method == "POST":
+        # ajax 통신을 할 경우(http method == post)
         data = request.get_json()
 
         if 'id' in data:
+            # id 중복체크
             user = User.query.filter_by(user_id = data['id']).first()
 
             if user:
@@ -52,6 +54,7 @@ def register():
                 return jsonify(data = True)
 
         elif 'userName' in data:
+            # 닉네임 중복체크
             user = User.query.filter_by(username = data['userName']).first()
 
             if user:
@@ -60,6 +63,7 @@ def register():
                 return jsonify(data = True)
 
         elif 'form' in data:
+            # 회원가입 submit
             try:
                 password_hash = db.session.query(func.sha2(data["form"]["password"], 224))
                 user = User(user_id = data['form']['id'], username = data["form"]["username"], password_hash = password_hash)
@@ -76,8 +80,10 @@ def register():
 
 @main.route('/search', methods=['GET', 'POST'])
 def search():
+    # 비밀번호 찾기 뷰함수
     if not 'id' in session:
         if request.method == 'POST':
+            # 아이디 검색
             id = request.form['id']
             user = User.query.filter_by(user_id = id).first_or_404()
 
@@ -93,8 +99,10 @@ def search():
 
 @main.route('/reset', methods=['GET', 'POST'])
 def reset():
+    # 비밀번호 변경 뷰함수
     if 'id' in session:
         if request.method == 'POST':
+            # 비밀번호 변경
             user = User.query.filter_by(id = session['id']).first()
             password_hash = db.session.query(func.sha2(request.form['pw'], 224))
             user.password_hash = password_hash
@@ -113,6 +121,7 @@ def reset():
 
 @main.route('/logout')
 def logout():
+    # 로그아웃 뷰함수
     if 'id' in session:
         session.pop('id', None)
     else:
@@ -123,6 +132,7 @@ def logout():
 
 @main.route('/profile')
 def profile():
+    # 프로필 뷰함수
     if 'id' in session:
         user = User.query.filter_by(id = session['id']).first_or_404()
         return render_template('main/profile.html', user = user)
@@ -131,10 +141,33 @@ def profile():
         return redirect(url_for('.index'))
 
 
-@main.route('/edit_profile')
+@main.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
+    # 프로필 수정 뷰함수
     if 'id' in session:
         user = User.query.filter_by(id = session['id']).first()
+        if request.method == 'POST':
+            print(request.form)
+            print(request.files)
+            username = request.form['userName']
+            profile_name = request.form['profileName']
+            if profile_name == 'default-profile.png':
+                # 프로필 이미지의 파일명이 기본 프로필 이미지 파일명과 같은 경우
+                pass
+            elif profile_name == user.profile_name:
+                # 변경할 프로필 이미지의 파일명과 현재 파일명이 같은 경우
+                pass
+            else:
+                # 파일명이 같지 않는 경우
+                pass
+
+            if username == user.username:
+                # 닉네임 변경시 저장된 닉네임과 같을 경우
+                pass
+            else:
+                # 다를 경우
+                pass
+            return jsonify(confirm = False)
         return render_template('main/edit_profile.html', user = user)
     else:
         flash('로그인이 되어있지 않습니다.')

@@ -5,7 +5,6 @@
 {% block contents %}
   <div class="m-5">
     <div class="container col-sm-6">
-      <form>
         <div class="row">
           <div class="bg-secondary col-sm-4 text-center">
             <h4 class="text-light font-weight-bold m-4">프로필 사진</h4>
@@ -14,16 +13,17 @@
             <div class="container">
               <div class="mt-3">
                 {% if user.profile_name == 'default-profile.png' %}
-                  <img src="{{url_for('static', filename='profile/')}}default-profile.png" class="rounded-circle" />
+                  <img src="{{url_for('static', filename='profile/')}}default-profile.png" class="rounded-circle" id="profileImg" style="width: 64px;" />
                 {% else %}
-                  <img src="{{url_for('static', filename='profile/')}}{{user.user_id}}/{{user.profile_name}}" class="rounded-circle" />
+                  <img src="{{url_for('static', filename='profile/')}}{{user.user_id}}/{{user.profile_name}}" class="rounded-circle" id="profileImg" style="width: 64px;" />
                 {% endif %}
               </div>
               <div class="mt-2 container">
                 <label class="btn btn-secondary float-left" for="profile">변경</label>
-                <input type="file" id="profile" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;"/>
+                <input type="file" id="profile" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;" />
+                <input type="hidden" id="profileName" value="{{user.profile_name}}" />
                    
-                <a href="#" class="btn btn-secondary float-right text-light">삭제</a>
+                <button id="cancelBtn" class="btn btn-secondary float-right text-light" disabled>삭제</button>
               </div>
             </div>
           </div>
@@ -34,15 +34,98 @@
           </div>
           <div class="border bg-light col-sm-8">
             <div class="container">
-              <input class="form-control m-3" type="text" value="{{user.username}}"/>
+              <input id="userName" class="form-control m-3" type="text" name="userName" value="{{user.username}}"/>
             </div>
           </div>
         </div>
         <div class="container mt-3">
-          <input type="submit" class="btn btn-outline-secondary float-left" disabled>
-          <a href="#" class="btn btn-outline-secondary float-right">취소</a>
+          <input type="button" id="submit" class="btn btn-secondary float-left" value="적용" disabled>
+          <a href="{{url_for('main.profile')}}" class="btn btn-outline-secondary float-right">취소</a>
         </div>
-      </form>
     </div>
   </div>
+  <script>
+    var fileList;
+    var confirmSubmit = true;
+
+    $(function(){
+      $('#profile').on('change', function(e){
+        // profile image file change
+        var fileReader = new FileReader();
+        fileReader.readAsDataURL(e.target.files[0]);
+        fileReader.onload = function(e){
+          var profileName = document.getElementById('profile').files[0].name;
+          profileName = profileName.replace(/ /gi,"-");
+          document.getElementById('profileName').value = profileName;
+          fileList = document.getElementById('profile').files[0];
+          document.getElementById('profileImg').src = e.target.result;
+          document.getElementById('submit').disabled = false;
+          document.getElementById('cancelBtn').disabled = false;
+        }
+      });
+     
+      $('#userName').on('keyup', function(){
+        // username change
+        document.getElementById('submit').disabled = false;
+      });
+     
+      $('#cancelBtn').on('click', function(){
+        // profile image file reset
+        fileList = "";
+        var file = document.getElementById('profile');
+        document.getElementById('profileImg').src = '/static/profile/default-profile.png';
+        document.getElementById('profileName').value = 'default-profile.png';
+        if(navigator.userAgent.search('Trident') != -1 || navigator.userAgent.search('msie') != -1){
+          // ie
+          $("#profile").replaceWith($('#profile').clone(true));
+        }else{
+          // chrome
+          file.value = "";
+        }
+      });
+     
+      $('#submit').on('click', function(){
+        // edit profile
+        var userName = document.getElementById('userName').value;
+        var firstNum = userName.indexOf(" ");
+        var lastNum = userName.lastIndexOf(" ");
+       
+        if(userName.trim() == ""){
+          // not username
+          alert("닉네임을 지어주세요.");
+        }else if(firstNum == 0 || lastNum == userName.length - 1){
+          // username first and last char white space check
+          alert("오류가 발생했습니다.");
+          confirmSubmit= false;
+        }else{
+          if(confirmSubmit){
+            var profileName = document.getElementById('profileName').value;
+            var formData = new FormData();
+            formData.append('userName', userName);
+            formData.append('profileName', profileName);
+            if(profileName){
+              console.log(fileList);
+              formData.append('file', fileList);
+            }
+            $.ajax({
+              type:'post',
+              url:"/edit_profile",
+              contentType: false,
+              processData: false,
+              data: formData,
+              success: function(response){
+                if(response.confirm){
+                  location.replace('/profile');
+                }else{
+                  alert('오류 발생');
+                }
+              }
+            });
+          }else{
+            alert("오류가 발생했습니다.");
+          }
+        }
+      });
+    });
+  </script>
 {% endblock %}
