@@ -23,7 +23,7 @@
                 <input type="file" id="profile" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;" />
                 <input type="hidden" id="profileName" value="{{user.profile_name}}" />
                    
-                <button id="cancelBtn" class="btn btn-secondary float-right text-light" disabled>삭제</button>
+                <button id="cancelBtn" class="btn btn-secondary float-right text-light">삭제</button>
               </div>
             </div>
           </div>
@@ -47,6 +47,12 @@
   <script>
     var fileList;
     var confirmSubmit = true;
+   
+    if('{{user.profile_name}}' == 'default-profile.png'){
+      document.getElementById('cancelBtn').disabled = true;
+    }else{
+      document.getElementById('cancelBtn').disabled = false;
+    }
 
     $(function(){
       $('#profile').on('change', function(e){
@@ -72,6 +78,10 @@
       $('#cancelBtn').on('click', function(){
         // profile image file reset
         fileList = "";
+        if(document.getElementById('submit').disabled == true){
+          document.getElementById('submit').disabled = false;
+        }
+       
         var file = document.getElementById('profile');
         document.getElementById('profileImg').src = '/static/profile/default-profile.png';
         document.getElementById('profileName').value = 'default-profile.png';

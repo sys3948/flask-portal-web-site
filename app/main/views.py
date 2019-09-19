@@ -88,6 +88,7 @@ def search():
             user = User.query.filter_by(user_id = id).first_or_404()
 
             session['id'] = user.id
+            session['url'] = 'search'
 
             return redirect(url_for('.reset'))
         return render_template('main/search_password.html')
@@ -107,12 +108,23 @@ def reset():
             password_hash = db.session.query(func.sha2(request.form['pw'], 224))
             user.password_hash = password_hash
             db.session.commit()
-
-            session.pop('id', None)
-
             flash('비밀번호 변경했습니다.')
 
-            return redirect(url_for('.index'))
+            if 'url' in session:
+                # 이전 url이 /search인 경우
+                if session['url'] == 'search':
+                    # /search에서 넘어온 경우
+                    session.pop('id', None)
+                    session.pop('url', None)
+
+                    return redirect(url_for('.login'))
+
+                if session['url'] == 'check':
+                    # /check에서 넘어온 경우
+                    session.pop('url', None)
+
+                    return redirect(url_for('.profile'))
+
         return render_template('main/reset_password.html')
     else:
         flash('로그인이 되어있지 않거나, 해당 접근 방식으로는 비밀번호 변경이 불가능합니다.')
@@ -147,28 +159,46 @@ def edit_profile():
     if 'id' in session:
         user = User.query.filter_by(id = session['id']).first()
         if request.method == 'POST':
-            print(request.form)
-            print(request.files)
             username = request.form['userName']
             profile_name = request.form['profileName']
-            if profile_name == 'default-profile.png':
+            if profile_name == 'default-profile.png' and profile_name != user.profile_name:
                 # 프로필 이미지의 파일명이 기본 프로필 이미지 파일명과 같은 경우
-                pass
+                user.profile_name = profile_name
             elif profile_name == user.profile_name:
-                # 변경할 프로필 이미지의 파일명과 현재 파일명이 같은 경우
                 pass
             else:
                 # 파일명이 같지 않는 경우
-                pass
+                profile_file = request.files['file']
+                profile_file.save(os.path.join(current_app.config['PROFILE_PATH'], user.user_id, profile_name))
+                user.profile_name = profile_name
 
             if username == user.username:
                 # 닉네임 변경시 저장된 닉네임과 같을 경우
                 pass
             else:
                 # 다를 경우
-                pass
+                user.username = username
+
+            db.session.commit()
             return jsonify(confirm = False)
         return render_template('main/edit_profile.html', user = user)
     else:
         flash('로그인이 되어있지 않습니다.')
         return redirect(url_for('.index'))
+
+
+@main.route('/check_current_password', methods=['GET', 'POST'])
+def check():
+    # 현재 비밀번호를 확인하는 뷰함수
+    if request.method == 'POST':
+        current_password = request.form['currentPw']
+        current_password_hash = db.session.query(func.sha2(current_password,224))
+        user = User.query.filter_by(id = session['id'], password_hash = current_password_hash).first()
+        if not user:
+            flash('입력하신 비밀번호는 현재 비밀번호와 맞지 않습니다.')
+            return redirect(url_for('.check'))
+
+        session['url'] = 'check'
+
+        return redirect(url_for('.reset'))
+    return render_template('main/check_old_password.html')
